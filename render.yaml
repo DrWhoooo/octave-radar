@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: octave-radar-crm
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+  - type: cron
+    name: octave-radar-linkedin-import
+    runtime: python
+    plan: starter
+    schedule: "0 6 * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/worker.py linkedin-import-safe
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: LINKEDIN_IMPORT_CSV_PATH
+        value: data/linkedin_contacts_import_ready.csv
+      - key: LINKEDIN_PROMOTE_MIN_SCORE
+        value: "65"
+      - key: LINKEDIN_PROMOTE_MIN_MATCH
+        value: "70"
+      - key: LINKEDIN_PROMOTE_LIMIT
+        value: "1000"
+
+  - type: cron
+    name: octave-radar-targeted-news
+    runtime: python
+    plan: starter
+    schedule: "0 8 * * 1-5"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/worker.py targeted-news
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: TARGETED_NEWS_COMPANY_LIMIT
+        value: "120"
+      - key: TARGETED_NEWS_MAX_QUERIES
+        value: "3"
+      - key: TARGETED_NEWS_MAX_ENTRIES
+        value: "4"
