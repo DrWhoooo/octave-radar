@@ -142,10 +142,10 @@ with tab0:
 with tab1:
     st.markdown("### 🔥 Comptes prioritaires")
     f1,f2,f3,f4 = st.columns(4)
-    with f1: min_score = st.slider("Hot score min.", 0, 100, 50)
+    with f1: min_score = st.slider("Hot score min.", 0, 100, 30)
     with f2: only_li = st.checkbox("Avec contacts LinkedIn")
     with f3: only_prog = st.checkbox("Avec programmes")
-    with f4: limit = st.slider("Nombre", 20, 300, 60)
+    with f4: limit = st.slider("Nombre", 20, 300, 150)
 
     q = sb.table("companies").select(
         "id,name,region,city,company_type,hot_score,website,website_status,"
