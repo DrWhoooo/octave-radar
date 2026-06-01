@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Octave Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #faf8f4;
+  --cream2: #f5f2ec;
+  --cream3: #ede9e0;
+  --white: #ffffff;
+  --border: #e8e3d8;
+  --border2: #d4cec0;
+  --text: #2c2825;
+  --text2: #6b6560;
+  --text3: #a09890;
+  --accent: #e8533a;
+  --accent2: #f0855a;
+  --blue: #2d6ef5;
+  --blue2: #5b8df7;
+  --green: #18a867;
+  --green2: #4dc68a;
+  --purple: #7c3aed;
+  --yellow: #d97706;
+  --red: #dc2626;
+  --shadow: 0 1px 3px rgba(44,40,37,0.08), 0 4px 16px rgba(44,40,37,0.04);
+  --shadow2: 0 2px 8px rgba(44,40,37,0.12), 0 8px 32px rgba(44,40,37,0.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--cream);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 220px;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.logo-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+/* Stats sidebar */
+.sidebar-stats {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sstat {
+  background: var(--cream);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.sstat-val {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+
+.sstat-label {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 2px;
+  letter-spacing: 0.3px;
+}
+
+/* Nav */
+.sidebar-nav {
+  padding: 10px 10px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 400;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover { background: var(--cream); color: var(--text); }
+
+.nav-item.active {
+  background: var(--cream2);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+
+.nav-count {
+  margin-left: auto;
+  background: var(--cream3);
+  color: var(--text2);
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.nav-item.active .nav-count {
+  background: var(--accent);
+  color: white;
+}
+
+/* ── MAIN ── */
+.content {
+  margin-left: 220px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+.page-header {
+  padding: 24px 28px 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-title {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  padding-bottom: 16px;
+}
+
+.page-actions {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 16px;
+}
+
+.page-body { padding: 24px 28px; }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── BTN ── */
+.btn {
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+.btn-primary:hover { background: #d4472f; }
+
+.btn-outline {
+  background: white;
+  color: var(--text);
+  border: 1px solid var(--border2);
+}
+.btn-outline:hover { border-color: var(--text3); background: var(--cream); }
+
+.btn-blue {
+  background: var(--blue);
+  color: white;
+}
+.btn-blue:hover { background: #2560e0; }
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 5px;
+}
+
+/* ── COCKPIT ── */
+.cockpit-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+
+/* Mission cards */
+.mission-list { display: flex; flex-direction: column; gap: 8px; }
+
+.mission-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: var(--shadow);
+  animation: fade-up 0.3s ease both;
+}
+
+.mission-card:hover {
+  box-shadow: var(--shadow2);
+  border-color: var(--border2);
+  transform: translateY(-1px);
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.mc-name {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+
+.mc-meta {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+.score-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Fraunces', serif;
+}
+
+.score-hot { background: #fff1ee; color: var(--accent); border: 1px solid #fcd5cc; }
+.score-warm { background: #fef9ee; color: var(--yellow); border: 1px solid #fde9b0; }
+.score-cool { background: #eef4ff; color: var(--blue); border: 1px solid #c7d9fe; }
+.score-cold { background: var(--cream2); color: var(--text3); border: 1px solid var(--border); }
+
+.mc-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.chip {
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.chip-partner { background: #f3f0ff; color: var(--purple); border: 1px solid #ddd6fe; }
+.chip-program { background: #f0fdf6; color: var(--green); border: 1px solid #bbf7d0; }
+.chip-rehab   { background: #fff1f2; color: var(--red); border: 1px solid #fecdd3; }
+.chip-foncier { background: #fffbeb; color: var(--yellow); border: 1px solid #fde68a; }
+.chip-recruit { background: #eff6ff; color: var(--blue); border: 1px solid #bfdbfe; }
+.chip-permit  { background: #fff7ed; color: var(--accent2); border: 1px solid #fed7aa; }
+
+.mc-contact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--cream);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.contact-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--cream3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text2);
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.contact-name { font-size: 12px; font-weight: 500; color: var(--text); }
+.contact-role { font-size: 11px; color: var(--text3); }
+
+.mc-actions { display: flex; gap: 6px; }
+
+/* Feed */
+.feed-panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 20px;
+}
+
+.feed-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  animation: fade-up 0.3s ease both;
+}
+
+.feed-item:last-child { border-bottom: none; }
+
+.feed-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.feed-co { font-size: 12px; font-weight: 500; color: var(--text); }
+.feed-ev { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+/* ── TABLE ── */
+.table-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  outline: none;
+  width: 220px;
+  transition: border-color 0.15s;
+}
+
+.search:focus { border-color: var(--accent); }
+.search::placeholder { color: var(--text3); }
+
+.sel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.tbl th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  background: var(--cream);
+}
+
+.tbl td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tbody tr:hover td { background: var(--cream); cursor: pointer; }
+
+.co-name {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.co-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+/* ── SIGNALS GRID ── */
+.sig-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 10px;
+}
+
+.sig-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  transition: all 0.15s;
+  animation: fade-up 0.3s ease both;
+}
+
+.sig-card:hover {
+  box-shadow: var(--shadow2);
+  transform: translateY(-2px);
+}
+
+.sig-co {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.sig-pain {
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.4;
+  margin-top: 6px;
+}
+
+.sig-src {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 8px;
+}
+
+/* ── STATUS BADGES ── */
+.status {
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.st-new { background: #f0fdf6; color: var(--green); border: 1px solid #bbf7d0; }
+.st-sent { background: #eff6ff; color: var(--blue); border: 1px solid #bfdbfe; }
+.st-connected { background: #f3f0ff; color: var(--purple); border: 1px solid #ddd6fe; }
+.st-discussion { background: #fffbeb; color: var(--yellow); border: 1px solid #fde68a; }
+.st-rdv { background: #fff1ee; color: var(--accent); border: 1px solid #fcd5cc; }
+
+/* ── MODAL ── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(44,40,37,0.4);
+  z-index: 200;
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay.open { display: flex; }
+
+.modal {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  width: 90%;
+  max-width: 680px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(44,40,37,0.2);
+  animation: modal-in 0.2s ease;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.4px;
+}
+
+.modal-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+.modal-close {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 14px;
+  width: 28px; height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover { background: var(--cream2); }
+
+.mfield {
+  margin-bottom: 14px;
+}
+
+.mfield-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 5px;
+}
+
+.mfield-val {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* INSIGHT BLOCK */
+.insight-block {
+  background: linear-gradient(135deg, #faf7ff 0%, #f5f0ff 100%);
+  border: 1px solid #e9e3ff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.ib-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--purple);
+  margin-bottom: 6px;
+}
+
+.ib-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--text);
+  color: white;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 12px;
+  z-index: 300;
+  transform: translateY(60px);
+  opacity: 0;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(44,40,37,0.25);
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* LOADING */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 10px;
+  color: var(--text3);
+}
+
+.loader {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  text-align: center;
+  padding: 48px;
+  color: var(--text3);
+}
+
+.empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.4; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .content { margin-left: 0; }
+  .cockpit-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">🎯</div>
+      <div>
+        <div class="logo-name">Octave Radar</div>
+        <div class="logo-sub">Prospection B2B</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-stats" id="sideStats">
+    <div class="sstat"><div class="sstat-val" id="sSocietes">—</div><div class="sstat-label">Sociétés</div></div>
+    <div class="sstat"><div class="sstat-val" id="sContacts">—</div><div class="sstat-label">Contacts</div></div>
+    <div class="sstat"><div class="sstat-val" id="sWalaxy">—</div><div class="sstat-label">Walaxy ✓</div></div>
+    <div class="sstat"><div class="sstat-val" id="sSignaux">—</div><div class="sstat-label">Signaux</div></div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="showPage('cockpit',this)">
+      <span class="nav-icon">⚡</span> Cockpit
+    </button>
+    <button class="nav-item" onclick="showPage('comptes',this)">
+      <span class="nav-icon">🏢</span> Comptes
+      <span class="nav-count" id="navComptes">—</span>
+    </button>
+    <button class="nav-item" onclick="showPage('contacts',this)">
+      <span class="nav-icon">👤</span> Contacts
+      <span class="nav-count" id="navContacts">—</span>
+    </button>
+    <button class="nav-item" onclick="showPage('signaux',this)">
+      <span class="nav-icon">📡</span> Signaux
+      <span class="nav-count" id="navSignaux">—</span>
+    </button>
+    <button class="nav-item" onclick="showPage('programmes',this)">
+      <span class="nav-icon">🏗️</span> Programmes
+      <span class="nav-count" id="navProgrammes">—</span>
+    </button>
+  </nav>
+</aside>
+
+<!-- ── CONTENT ── -->
+<div class="content">
+
+  <!-- COCKPIT -->
+  <div id="page-cockpit" class="page active">
+    <div class="page-header">
+      <div class="page-title">Cockpit</div>
+    </div>
+    <div class="page-body">
+      <div class="cockpit-grid">
+        <div>
+          <div class="section-label">Mission du jour</div>
+          <div class="mission-list" id="missionList">
+            <div class="loading"><div class="loader"></div> Chargement...</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Activité récente</div>
+          <div class="feed-panel">
+            <div id="activityFeed"><div class="loading"><div class="loader"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPTES -->
+  <div id="page-comptes" class="page">
+    <div class="page-header">
+      <div class="page-title">Comptes</div>
+      <div class="page-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportWalaxy()">↓ Export Walaxy</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="table-bar">
+        <input type="text" class="search" id="searchComptes" placeholder="🔍 Rechercher..." oninput="filterComptes()">
+        <select class="sel" id="filterRegion" onchange="filterComptes()"><option value="">Toutes régions</option></select>
+        <select class="sel" id="filterScore" onchange="filterComptes()">
+          <option value="0">Score ≥ 0</option>
+          <option value="30">Score ≥ 30</option>
+          <option value="50">Score ≥ 50</option>
+          <option value="70">Score ≥ 70</option>
+        </select>
+        <select class="sel" id="filterSignal" onchange="filterComptes()">
+          <option value="">Tous signaux</option>
+          <option value="partner_space">🤝 Partenaires</option>
+          <option value="program_launch">🏗️ Programme</option>
+          <option value="rehabilitation">🔨 Réhab</option>
+          <option value="recruitment">👥 Recrutement</option>
+          <option value="foncier">🌍 Foncier</option>
+        </select>
+      </div>
+      <table class="tbl">
+        <thead><tr>
+          <th>Société</th><th>Type</th><th>Score</th><th>Signaux</th><th>Contacts LI</th><th>Progs</th><th>Site</th>
+        </tr></thead>
+        <tbody id="comptesBody"><tr><td colspan="7"><div class="loading"><div class="loader"></div> Chargement...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CONTACTS -->
+  <div id="page-contacts" class="page">
+    <div class="page-header">
+      <div class="page-title">Contacts</div>
+      <div class="page-actions">
+        <button class="btn btn-primary btn-sm" onclick="exportWalaxy()">↓ Export Walaxy CSV</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="table-bar">
+        <input type="text" class="search" id="searchContacts" placeholder="🔍 Rechercher..." oninput="filterContacts()">
+        <select class="sel" id="filterWalaxy" onchange="filterContacts()">
+          <option value="">Tous</option>
+          <option value="true">Walaxy ready ✓</option>
+        </select>
+        <select class="sel" id="filterSource" onchange="filterContacts()">
+          <option value="">Toutes sources</option>
+          <option value="linkedin_file">LinkedIn</option>
+          <option value="official_site">Site web</option>
+        </select>
+      </div>
+      <table class="tbl">
+        <thead><tr>
+          <th>Contact</th><th>Rôle</th><th>Source</th><th>Score</th><th>Statut</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="contactsBody"><tr><td colspan="6"><div class="loading"><div class="loader"></div> Chargement...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SIGNAUX -->
+  <div id="page-signaux" class="page">
+    <div class="page-header">
+      <div class="page-title">Signaux</div>
+    </div>
+    <div class="page-body">
+      <div class="table-bar">
+        <input type="text" class="search" id="searchSignaux" placeholder="🔍 Rechercher..." oninput="filterSignaux()">
+        <select class="sel" id="filterSigType" onchange="filterSignaux()">
+          <option value="">Tous types</option>
+          <option value="partner_space">🤝 Partenaires</option>
+          <option value="program_launch">🏗️ Programme</option>
+          <option value="program_page">📋 Page programmes</option>
+          <option value="rehabilitation">🔨 Réhab</option>
+          <option value="recruitment">👥 Recrutement</option>
+          <option value="foncier">🌍 Foncier</option>
+        </select>
+        <select class="sel" id="filterSigScore" onchange="filterSignaux()">
+          <option value="0">Score ≥ 0</option>
+          <option value="60">Score ≥ 60</option>
+          <option value="75">Score ≥ 75</option>
+        </select>
+      </div>
+      <div class="sig-grid" id="sigGrid"><div class="loading"><div class="loader"></div> Chargement...</div></div>
+    </div>
+  </div>
+
+  <!-- PROGRAMMES -->
+  <div id="page-programmes" class="page">
+    <div class="page-header">
+      <div class="page-title">Programmes</div>
+    </div>
+    <div class="page-body">
+      <div class="table-bar">
+        <input type="text" class="search" id="searchProgrammes" placeholder="🔍 Rechercher..." oninput="filterProgrammes()">
+        <select class="sel" id="filterFiscal" onchange="filterProgrammes()">
+          <option value="">Toutes fiscalités</option>
+          <option value="malraux">Malraux</option>
+          <option value="denormandie">Denormandie</option>
+          <option value="pinel">Pinel</option>
+          <option value="deficit">Déficit foncier</option>
+        </select>
+      </div>
+      <table class="tbl">
+        <thead><tr>
+          <th>Programme</th><th>Promoteur</th><th>Ville</th><th>Fiscalité</th><th>Prix</th><th>Score</th><th>Lien</th>
+        </tr></thead>
+        <tbody id="programmesBody"><tr><td colspan="7"><div class="loading"><div class="loader"></div> Chargement...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- MODAL COMPTE -->
+<div class="overlay" id="compteModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modalName">—</div>
+        <div class="modal-sub" id="modalMeta">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ CONFIG ══
+const SUPA_URL = 'https://ejxlqdmmnyitvnieqhhk.supabase.co';
+const SUPA_KEY = 'ANON_KEY_ICI';
+
+// ══ API ══
+async function supa(table, params='') {
+  const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${params}`, {
+    headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}`, Prefer: 'count=exact' }
+  });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+async function supaCount(table, params='') {
+  const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${params}&limit=1`, {
+    headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}`, Prefer: 'count=exact' }
+  });
+  return parseInt(r.headers.get('content-range')?.split('/')[1]||'0');
+}
+
+// ══ CACHE ══
+const C = { companies:[], contacts:[], signals:[], programmes:[], companySigs:{}, loaded:{} };
+
+// ══ SIGNAL CONFIG ══
+const SIG = {
+  partner_space:  { cls:'chip-partner', label:'🤝 Partenaires', dot:'#7c3aed' },
+  program_launch: { cls:'chip-program', label:'🏗️ Programme',  dot:'#18a867' },
+  program_page:   { cls:'chip-program', label:'📋 Programmes',  dot:'#18a867' },
+  rehabilitation: { cls:'chip-rehab',   label:'🔨 Réhab',       dot:'#dc2626' },
+  foncier:        { cls:'chip-foncier', label:'🌍 Foncier',     dot:'#d97706' },
+  recruitment:    { cls:'chip-recruit', label:'👥 Recrutement', dot:'#2d6ef5' },
+  permis_construire:{ cls:'chip-permit',label:'🔧 Permis',      dot:'#f0855a' },
+};
+
+function chip(type) {
+  const s = SIG[type]||{cls:'chip-foncier',label:type};
+  return `<span class="chip ${s.cls}">${s.label}</span>`;
+}
+
+function scoreClass(s) {
+  if (s>=76) return 'score-hot';
+  if (s>=51) return 'score-warm';
+  if (s>=26) return 'score-cool';
+  return 'score-cold';
+}
+
+// ══ NAV ══
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  if(el) el.classList.add('active');
+  if(!C.loaded[name]) { C.loaded[name]=true; loadPage(name); }
+}
+
+async function loadPage(n) {
+  if(n==='cockpit') loadCockpit();
+  else if(n==='comptes') loadComptes();
+  else if(n==='contacts') loadContacts();
+  else if(n==='signaux') loadSignaux();
+  else if(n==='programmes') loadProgrammes();
+}
+
+// ══ STATS ══
+async function loadStats() {
+  try {
+    const [soc,con,wal,sig,prog] = await Promise.all([
+      supaCount('companies'), supaCount('contacts'),
+      supaCount('contacts','walaxy_ready=eq.true'),
+      supaCount('enrichment_signals'), supaCount('programs')
+    ]);
+    document.getElementById('sSocietes').textContent = soc.toLocaleString('fr');
+    document.getElementById('sContacts').textContent = con.toLocaleString('fr');
+    document.getElementById('sWalaxy').textContent = wal.toLocaleString('fr');
+    document.getElementById('sSignaux').textContent = sig.toLocaleString('fr');
+    document.getElementById('navComptes').textContent = soc.toLocaleString('fr');
+    document.getElementById('navContacts').textContent = con.toLocaleString('fr');
+    document.getElementById('navSignaux').textContent = sig.toLocaleString('fr');
+    document.getElementById('navProgrammes').textContent = prog.toLocaleString('fr');
+  } catch(e){}
+}
+
+// ══ COCKPIT ══
+async function loadCockpit() {
+  try {
+    const cos = await supa('companies',
+      'select=id,name,region,city,company_type,hot_score,website,top_linkedin_contact_name,top_linkedin_contact_role,top_linkedin_contact_url,linkedin_contacts_count,programs_count&hot_score=gte.40&order=hot_score.desc&limit=20');
+
+    const ids = cos.map(c=>c.id);
+    let sigMap = {};
+    if(ids.length) {
+      const sigs = await supa('enrichment_signals',
+        `select=company_id,signal_type,confidence&company_id=in.(${ids.join(',')})&confidence=gte.60&limit=200`);
+      sigs.forEach(s=>{ if(!sigMap[s.company_id]) sigMap[s.company_id]=[]; sigMap[s.company_id].push(s); });
+    }
+
+    const list = document.getElementById('missionList');
+    if(!cos.length) { list.innerHTML='<div class="empty"><div class="empty-icon">🎯</div>Aucune mission pour l\'instant</div>'; return; }
+
+    list.innerHTML = cos.map((c,i) => {
+      const sigs = sigMap[c.id]||[];
+      const sc = scoreClass(c.hot_score);
+      const chips = sigs.slice(0,4).map(s=>chip(s.signal_type)).join('');
+      const initials = (c.top_linkedin_contact_name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      return `<div class="mission-card" style="animation-delay:${i*0.04}s" onclick="openModal('${c.id}')">
+        <div class="mc-top">
+          <div>
+            <div class="mc-name">${c.name}</div>
+            <div class="mc-meta">${c.company_type||'—'} · ${c.region||'—'} · ${c.city||'—'}</div>
+          </div>
+          <span class="score-badge ${sc}">${c.hot_score}</span>
+        </div>
+        ${chips?`<div class="mc-signals">${chips}</div>`:''}
+        ${c.top_linkedin_contact_name?`<div class="mc-contact">
+          <div class="contact-avatar">${initials}</div>
+          <div><div class="contact-name">${c.top_linkedin_contact_name}</div><div class="contact-role">${c.top_linkedin_contact_role||''}</div></div>
+        </div>`:''}
+        <div class="mc-actions">
+          ${c.top_linkedin_contact_url?`<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window.open('${c.top_linkedin_contact_url}','_blank')">💼 LinkedIn</button>`:''}
+          ${c.website?`<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();window.open('${c.website}','_blank')">🌐 Site</button>`:''}
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();this.closest('.mission-card').style.opacity='0.35';this.closest('.mission-card').style.pointerEvents='none';toast('Traité ✓')">✓ Traité</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Feed
+    const feed = document.getElementById('activityFeed');
+    const items = [];
+    cos.slice(0,8).forEach(c => {
+      const s = (sigMap[c.id]||[])[0];
+      if(s) { const si=SIG[s.signal_type]||{dot:'#18a867',label:s.signal_type}; items.push({co:c.name,ev:si.label+' détecté',dot:si.dot}); }
+      if(c.linkedin_contacts_count>0) items.push({co:c.name,ev:`${c.linkedin_contacts_count} contact(s) LinkedIn`,dot:'#7c3aed'});
+    });
+    feed.innerHTML = items.slice(0,10).map((it,i)=>`
+      <div class="feed-item" style="animation-delay:${i*0.06}s">
+        <div class="feed-dot" style="background:${it.dot}"></div>
+        <div><div class="feed-co">${it.co}</div><div class="feed-ev">${it.ev}</div></div>
+      </div>`).join('') || '<div class="empty" style="padding:20px"><div class="empty-text">Aucune activité</div></div>';
+
+  } catch(e) {
+    document.getElementById('missionList').innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div>Erreur de connexion — vérifiez la clé API Supabase</div>`;
+  }
+}
+
+// ══ COMPTES ══
+async function loadComptes() {
+  try {
+    C.companies = await supa('companies',
+      'select=id,name,region,city,company_type,hot_score,website,website_status,linkedin_contacts_count,programs_count,top_linkedin_contact_name,top_linkedin_contact_role,top_linkedin_contact_url&order=hot_score.desc&limit=500');
+
+    const ids = C.companies.map(c=>c.id);
+    if(ids.length) {
+      const sigs = await supa('enrichment_signals',
+        `select=company_id,signal_type&company_id=in.(${ids.slice(0,200).join(',')})&confidence=gte.60&limit=1000`);
+      C.companySigs={};
+      sigs.forEach(s=>{ if(!C.companySigs[s.company_id]) C.companySigs[s.company_id]=[]; C.companySigs[s.company_id].push(s.signal_type); });
+    }
+
+    const regions=[...new Set(C.companies.map(c=>c.region).filter(Boolean))].sort();
+    const sel=document.getElementById('filterRegion');
+    regions.forEach(r=>{ const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o); });
+
+    renderComptes(C.companies);
+  } catch(e){}
+}
+
+function filterComptes() {
+  const q=document.getElementById('searchComptes').value.toLowerCase();
+  const reg=document.getElementById('filterRegion').value;
+  const ms=parseInt(document.getElementById('filterScore').value);
+  const sig=document.getElementById('filterSignal').value;
+  renderComptes(C.companies.filter(c=>{
+    if(q&&!c.name.toLowerCase().includes(q)) return false;
+    if(reg&&c.region!==reg) return false;
+    if(c.hot_score<ms) return false;
+    if(sig&&!(C.companySigs[c.id]||[]).includes(sig)) return false;
+    return true;
+  }));
+}
+
+function renderComptes(list) {
+  const tb=document.getElementById('comptesBody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div>Aucun résultat</div></td></tr>';return;}
+  tb.innerHTML=list.slice(0,200).map(c=>{
+    const sc=scoreClass(c.hot_score);
+    const chips=(C.companySigs[c.id]||[]).slice(0,3).map(chip).join('');
+    return`<tr onclick="openModal('${c.id}')">
+      <td><div class="co-name">${c.name}</div><div class="co-sub">${c.region||'—'} · ${c.city||'—'}</div></td>
+      <td style="color:var(--text2);font-size:11px">${c.company_type||'—'}</td>
+      <td><span class="score-badge ${sc}">${c.hot_score}</span></td>
+      <td>${chips||'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="text-align:center;font-weight:500">${c.linkedin_contacts_count||0}</td>
+      <td style="text-align:center">${c.programs_count||0}</td>
+      <td>${c.website?`<a href="${c.website}" target="_blank" onclick="event.stopPropagation()" style="color:var(--blue);font-size:11px">↗</a>`:'<span style="color:var(--text3)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══ CONTACTS ══
+async function loadContacts() {
+  try {
+    C.contacts = await supa('contacts',
+      'select=id,full_name,role,linkedin_url,confidence,walaxy_ready,external_source&order=confidence.desc&limit=500');
+    renderContacts(C.contacts);
+  } catch(e){}
+}
+
+function filterContacts() {
+  const q=document.getElementById('searchContacts').value.toLowerCase();
+  const wal=document.getElementById('filterWalaxy').value;
+  const src=document.getElementById('filterSource').value;
+  renderContacts(C.contacts.filter(c=>{
+    if(q&&!(c.full_name||'').toLowerCase().includes(q)&&!(c.role||'').toLowerCase().includes(q)) return false;
+    if(wal==='true'&&!c.walaxy_ready) return false;
+    if(src&&c.external_source!==src) return false;
+    return true;
+  }));
+}
+
+function renderContacts(list) {
+  const tb=document.getElementById('contactsBody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">👤</div>Aucun contact</div></td></tr>';return;}
+  tb.innerHTML=list.slice(0,200).map(c=>{
+    const sc=scoreClass(c.confidence);
+    const wal=c.walaxy_ready?'<span class="chip chip-program" style="font-size:9px">Walaxy ✓</span>':'';
+    return`<tr>
+      <td><div style="font-weight:500;color:var(--text)">${c.full_name||'—'}</div>${wal}</td>
+      <td style="color:var(--text2);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.role||'—'}</td>
+      <td><span class="chip ${c.external_source==='linkedin_file'?'chip-recruit':'chip-program'}" style="font-size:9px">${c.external_source==='linkedin_file'?'LinkedIn':'Site'}</span></td>
+      <td><span class="score-badge ${sc}">${c.confidence}</span></td>
+      <td><span class="status st-new">Non contacté</span></td>
+      <td style="display:flex;gap:6px;padding:11px 14px">
+        ${c.linkedin_url?`<button class="btn btn-primary btn-sm" onclick="window.open('${c.linkedin_url}','_blank')">💼</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ══ SIGNAUX ══
+async function loadSignaux() {
+  try {
+    C.signals = await supa('enrichment_signals',
+      'select=id,company_name,signal_type,confidence,commercial_pain,source_url&order=confidence.desc&limit=400');
+    renderSignaux(C.signals);
+  } catch(e){}
+}
+
+function filterSignaux() {
+  const q=document.getElementById('searchSignaux').value.toLowerCase();
+  const t=document.getElementById('filterSigType').value;
+  const ms=parseInt(document.getElementById('filterSigScore').value);
+  renderSignaux(C.signals.filter(s=>{
+    if(q&&!(s.company_name||'').toLowerCase().includes(q)) return false;
+    if(t&&s.signal_type!==t) return false;
+    if(s.confidence<ms) return false;
+    return true;
+  }));
+}
+
+function renderSignaux(list) {
+  const g=document.getElementById('sigGrid');
+  if(!list.length){g.innerHTML='<div class="empty"><div class="empty-icon">📡</div>Aucun signal</div>';return;}
+  g.innerHTML=list.map((s,i)=>{
+    const si=SIG[s.signal_type]||{cls:'chip-foncier',label:s.signal_type,dot:'#d97706'};
+    const sc=scoreClass(s.confidence);
+    return`<div class="sig-card" style="animation-delay:${(i%20)*0.025}s;border-top:3px solid ${si.dot}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="sig-co">${s.company_name||'—'}</div>
+        <span class="score-badge ${sc}" style="font-size:12px">${s.confidence}</span>
+      </div>
+      <span class="chip ${si.cls}">${si.label}</span>
+      <div class="sig-pain">${s.commercial_pain||''}</div>
+      ${s.source_url?`<div class="sig-src"><a href="${s.source_url}" target="_blank" style="color:var(--blue)">↗ Source</a></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ══ PROGRAMMES ══
+async function loadProgrammes() {
+  try {
+    C.programmes = await supa('programs',
+      'select=id,program_name,company_name,program_city,fiscality,price_from,confidence,program_url,is_program_detail&order=confidence.desc&limit=300');
+    renderProgrammes(C.programmes);
+  } catch(e){}
+}
+
+function filterProgrammes() {
+  const q=document.getElementById('searchProgrammes').value.toLowerCase();
+  const f=document.getElementById('filterFiscal').value.toLowerCase();
+  renderProgrammes(C.programmes.filter(p=>{
+    if(q&&!(p.program_name||'').toLowerCase().includes(q)&&!(p.company_name||'').toLowerCase().includes(q)) return false;
+    if(f&&!(p.fiscality||'').toLowerCase().includes(f)) return false;
+    return true;
+  }));
+}
+
+function renderProgrammes(list) {
+  const tb=document.getElementById('programmesBody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="7"><div class="empty">Aucun programme</div></td></tr>';return;}
+  tb.innerHTML=list.map(p=>{
+    const sc=scoreClass(p.confidence||0);
+    const price=p.price_from?`${Math.round(p.price_from).toLocaleString('fr')} €`:'—';
+    return`<tr>
+      <td><div class="co-name" style="font-size:12px">${p.program_name||'Programme détecté'}</div>${p.is_program_detail?'<span class="chip chip-program" style="font-size:9px">Détaillé</span>':''}</td>
+      <td style="font-size:11px;color:var(--text2)">${p.company_name||'—'}</td>
+      <td style="font-size:11px;color:var(--text2)">${p.program_city||'—'}</td>
+      <td style="font-size:11px">${p.fiscality||'—'}</td>
+      <td style="font-size:11px;color:var(--green);font-weight:500">${price}</td>
+      <td><span class="score-badge ${sc}" style="font-size:11px">${p.confidence||0}</span></td>
+      <td>${p.program_url?`<a href="${p.program_url}" target="_blank" style="color:var(--blue);font-size:11px">↗</a>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══ MODAL ══
+async function openModal(id) {
+  const c=C.companies.find(x=>x.id===id)||(await supa('companies',`select=*&id=eq.${id}&limit=1`))[0];
+  if(!c) return;
+  document.getElementById('modalName').textContent=c.name;
+  document.getElementById('modalMeta').textContent=`${c.company_type||'—'} · ${c.region||'—'} · ${c.city||'—'}`;
+
+  const [contacts,signals,programmes,insights]=await Promise.all([
+    supa('contacts',`select=full_name,role,linkedin_url,confidence,walaxy_ready&company_id=eq.${id}&limit=10`),
+    supa('enrichment_signals',`select=signal_type,confidence,commercial_pain,source_url&company_id=eq.${id}&order=confidence.desc&limit=8`),
+    supa('programs',`select=program_name,program_city,fiscality,confidence&company_id=eq.${id}&limit=5`),
+    supa('prospect_insights',`select=rationale,pain_points,approach_angle,outreach_message&company_id=eq.${id}&is_active=eq.true&limit=1`),
+  ]);
+
+  const ins=insights[0];
+  document.getElementById('modalBody').innerHTML=`
+    <div class="mgrid" style="margin-bottom:14px">
+      <div class="mfield"><div class="mfield-label">Hot Score</div><div class="mfield-val"><span class="score-badge ${scoreClass(c.hot_score)}" style="font-size:18px">${c.hot_score}</span></div></div>
+      <div class="mfield"><div class="mfield-label">Site web</div><div class="mfield-val">${c.website?`<a href="${c.website}" target="_blank" style="color:var(--blue)">${c.website}</a>`:'Non trouvé'}</div></div>
+    </div>
+    ${signals.length?`<div class="mfield"><div class="mfield-label">Signaux</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px">${signals.map(s=>`${chip(s.signal_type)}<span style="font-size:10px;color:var(--text3)">(${s.confidence})</span>`).join('')}</div></div>`:''}
+    ${contacts.length?`<div class="mfield"><div class="mfield-label">Contacts</div>${contacts.map(ct=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:500">${ct.full_name}</div><div style="font-size:11px;color:var(--text3)">${ct.role||'—'}</div></div><div style="display:flex;gap:6px">${ct.walaxy_ready?'<span class="chip chip-program">Walaxy ✓</span>':''}${ct.linkedin_url?`<a href="${ct.linkedin_url}" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none">💼</a>`:''}</div></div>`).join('')}</div>`:''}
+    ${ins?`<div class="insight-block"><div class="ib-label">Angle d'approche Claude</div><div class="ib-text" style="margin-bottom:8px"><strong>Pourquoi :</strong> ${ins.rationale}</div><div class="ib-text" style="margin-bottom:8px"><strong>Douleur :</strong> ${ins.pain_points}</div><div class="ib-text" style="margin-bottom:8px"><strong>Angle :</strong> ${ins.approach_angle}</div>${ins.outreach_message?`<div class="mfield-val" style="margin-top:8px;background:#f8f6ff;border-color:#e9e3ff">${ins.outreach_message}</div>`:''}</div>`:''}
+    ${programmes.length?`<div class="mfield"><div class="mfield-label">Programmes</div>${programmes.map(p=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">${p.program_name||'Programme'} · ${p.program_city||'—'} · ${p.fiscality||'—'}</div>`).join('')}</div>`:''}
+  `;
+  document.getElementById('compteModal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('compteModal').classList.remove('open');}
+document.getElementById('compteModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+// ══ EXPORT WALAXY ══
+async function exportWalaxy() {
+  try {
+    const contacts=await supa('contacts','select=full_name,role,linkedin_url&walaxy_ready=eq.true&external_source=eq.linkedin_file&limit=200');
+    if(!contacts.length){toast('Aucun contact Walaxy ready');return;}
+    const rows=['Prénom,Nom,Rôle,LinkedIn'];
+    contacts.forEach(c=>{
+      const p=(c.full_name||'').split(' ',2);
+      rows.push(`"${p[0]||''}","${p[1]||''}","${(c.role||'').replace(/"/g,'""')}","${c.linkedin_url||''}"`);
+    });
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+    a.download='walaxy_export.csv';a.click();
+    toast(`${contacts.length} contacts exportés ✓`);
+  } catch(e){toast('Erreur export');}
+}
+
+// ══ TOAST ══
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══ INIT ══
+loadStats();
+loadCockpit();
+</script>
+</body>
+</html>
